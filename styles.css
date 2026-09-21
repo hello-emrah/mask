@@ -1,0 +1,51 @@
+/* Mask: text between ||double pipes|| renders as a solid bar.
+   The words are never touched in the file. */
+
+.mask-bar,
+.mask-bar * {
+  color: transparent !important;
+  background-color: var(--text-normal) !important;
+  text-decoration: none !important;
+  text-shadow: none !important;
+  caret-color: var(--text-normal);
+}
+
+.mask-bar {
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.mask-bar img,
+.mask-bar svg {
+  opacity: 0 !important;
+}
+
+/* A selection must not give the words away. */
+.mask-bar::selection,
+.mask-bar *::selection {
+  color: transparent !important;
+}
+
+/* Revealed: the words show, with a quiet tint so I can see what is masked. */
+body.mask-reveal .mask-bar,
+body.mask-reveal .mask-bar * {
+  color: inherit !important;
+  background-color: transparent !important;
+}
+
+body.mask-reveal .mask-bar {
+  background-color: var(--background-modifier-hover) !important;
+  border-bottom: 1px dashed var(--text-faint);
+  border-radius: 0;
+}
+
+body.mask-reveal .mask-bar img,
+body.mask-reveal .mask-bar svg {
+  opacity: 1 !important;
+}
+
+body.mask-reveal .mask-bar::selection,
+body.mask-reveal .mask-bar *::selection {
+  color: inherit !important;
+}

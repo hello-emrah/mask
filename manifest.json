@@ -1,0 +1,9 @@
+{
+  "id": "mask",
+  "name": "Mask",
+  "version": "0.1.0",
+  "minAppVersion": "1.4.0",
+  "description": "Hide text behind black bars with ||double pipes||. The words stay in the file; only the view is masked. One command shows or hides everything.",
+  "author": "Emrah",
+  "isDesktopOnly": false
+}
