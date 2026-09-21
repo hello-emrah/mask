@@ -15,7 +15,7 @@ const { syntaxTree } = require('@codemirror/language');
 
 const DELIM = '||';
 // Like bold: the pipes must hug the words, so a stray || does not start a mask.
-const LINE_RE = /\|\|(?!\s)(.+?)(?<!\s)\|\|/g;
+const LINE_RE = /\|\|([^\s|](?:.*?[^\s|])?)\|\|/g;
 const TABLE_ROW_RE = /^\s*\|/;
 const SKIP_NODE_RE = /code|math|frontmatter|comment/i;
 const SKIP_READING = 'code, pre, .math, .frontmatter, .mask-bar';
@@ -79,7 +79,9 @@ const maskExtension = ViewPlugin.fromClass(
 /* ---------- Reading view ---------- */
 
 function maskRendered(el) {
-  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  // The note may be in a popout window, so everything is made from its own document.
+  const doc = el.ownerDocument;
+  const walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
   const nodes = [];
   let n;
   while ((n = walker.nextNode())) {
@@ -140,19 +142,19 @@ function maskRendered(el) {
   for (const [node, parts] of plan) {
     const text = node.nodeValue;
     parts.sort((a, b) => a.start - b.start);
-    const frag = document.createDocumentFragment();
+    const frag = doc.createDocumentFragment();
     let at = 0;
     for (const part of parts) {
-      if (part.start > at) frag.appendChild(document.createTextNode(text.slice(at, part.start)));
+      if (part.start > at) frag.appendChild(doc.createTextNode(text.slice(at, part.start)));
       if (part.type === 'mask') {
-        const span = document.createElement('span');
+        const span = doc.createElement('span');
         span.className = 'mask-bar';
         span.textContent = text.slice(part.start, part.end);
         frag.appendChild(span);
       }
       at = part.end;
     }
-    if (at < text.length) frag.appendChild(document.createTextNode(text.slice(at)));
+    if (at < text.length) frag.appendChild(doc.createTextNode(text.slice(at)));
     node.parentNode.replaceChild(frag, node);
   }
 }
@@ -162,7 +164,7 @@ function maskRendered(el) {
 function toggleMaskOnSelection(editor) {
   const sel = editor.getSelection();
   if (!sel || !sel.trim()) {
-    new Notice('Mask: select some text first.');
+    new Notice('Select some text first.');
     return;
   }
   const lines = sel.split('\n');
@@ -193,7 +195,9 @@ module.exports = class MaskPlugin extends Plugin {
   onload() {
     // Always start masked. Revealing is a deliberate act and never remembered.
     this.revealed = false;
-    document.body.classList.remove('mask-reveal');
+    this.applyReveal();
+    // A popout opened later takes the current state.
+    this.registerEvent(this.app.workspace.on('window-open', () => this.applyReveal()));
 
     // Exposed so both halves can be tested from the console without a note.
     this.extension = maskExtension;
@@ -201,7 +205,7 @@ module.exports = class MaskPlugin extends Plugin {
     this.registerEditorExtension(maskExtension);
     this.registerMarkdownPostProcessor((el) => maskRendered(el));
 
-    this.ribbon = this.addRibbonIcon('eye-off', 'Mask: show or hide masked text', () => this.toggleReveal());
+    this.ribbon = this.addRibbonIcon('eye-off', 'Show or hide masked text', () => this.toggleReveal());
 
     this.addCommand({
       id: 'toggle-reveal',
@@ -210,7 +214,7 @@ module.exports = class MaskPlugin extends Plugin {
     });
 
     this.addCommand({
-      id: 'mask-selection',
+      id: 'wrap-selection',
       name: 'Mask or unmask selection',
       editorCallback: (editor) => toggleMaskOnSelection(editor),
     });
@@ -218,12 +222,20 @@ module.exports = class MaskPlugin extends Plugin {
 
   toggleReveal() {
     this.revealed = !this.revealed;
-    document.body.classList.toggle('mask-reveal', this.revealed);
+    this.applyReveal();
     if (this.ribbon) setIcon(this.ribbon, this.revealed ? 'eye' : 'eye-off');
-    new Notice(this.revealed ? 'Mask: revealed' : 'Mask: hidden');
+    new Notice(this.revealed ? 'Masked text revealed' : 'Masked text hidden');
+  }
+
+  // The main window and every popout.
+  applyReveal() {
+    const docs = new Set([document]);
+    this.app.workspace.iterateAllLeaves((leaf) => docs.add(leaf.view.containerEl.ownerDocument));
+    for (const d of docs) d.body.classList.toggle('mask-reveal', this.revealed);
   }
 
   onunload() {
-    document.body.classList.remove('mask-reveal');
+    this.revealed = false;
+    this.applyReveal();
   }
 };
