@@ -1,9 +1,9 @@
 {
   "id": "mask",
   "name": "Mask",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minAppVersion": "1.4.0",
-  "description": "Hide text behind black bars with ||double pipes||. The words stay in the file and only the view is masked. One command shows or hides everything.",
+  "description": "Redact text without destroying it. Wrap words in ||double pipes|| to hide them behind black bars, and the file keeps every word.",
   "author": "Emrah",
   "isDesktopOnly": false,
   "authorUrl": "https://github.com/hello-emrah",

@@ -4,7 +4,7 @@
 
 # Mask
 
-Hide the words, keep the record.
+Redact text without destroying it. Hide the words, keep the record.
 
 Built for personal use, shared openly, not productised.
 
@@ -16,7 +16,7 @@ Built for personal use, shared openly, not productised.
 
 ## What it is
 
-An Obsidian plugin that hides text behind black bars. Wrap words in `||double pipes||` and they render as a solid bar in Live Preview and Reading view, while the file keeps every word exactly as written. It was made for sharing a screenshot of a journal page without sharing all of it, in a vault where the record is never edited to suit an audience. The other redaction plugins replace the text with block characters, which destroys it. This one only masks the view.
+An Obsidian plugin for redaction that does not destroy anything: it hides text behind black bars. Wrap words in `||double pipes||` and they render as a solid bar in Live Preview and Reading view, while the file keeps every word exactly as written. It was made for sharing a screenshot of a journal page without sharing all of it, in a vault where the record is never edited to suit an audience. The other redaction plugins replace the text with block characters, which destroys it. This one only masks the view.
 
 It runs entirely on your machine. There is no network, no account and no data file, and nothing is ever written to a note unless you run the mask command yourself.
 
